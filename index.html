@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ma in pratica, che lavoro fai? – OraBuca</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #ffe4ee;
+    --card: #ffffff;
+    --ink: #1a1a1a;
+    --muted: #7a5562;
+    --line: #f5c6d6;
+    --accent: #e0457b;
+    --accent-ink: #ffffff;
+    --chip: #ffd1e1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #2a1620;
+      --card: #361d29;
+      --ink: #fbeff4;
+      --muted: #d1a6b7;
+      --line: #4d2a3b;
+      --accent: #ff7aa8;
+      --accent-ink: #2a1620;
+      --chip: #45253a;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 48px 16px 64px; }
+
+  .kicker {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 900;
+    font-size: clamp(36px, 8vw, 54px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+  .sub {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 500;
+    font-size: 19px;
+    color: var(--muted);
+    margin-top: 12px;
+  }
+
+  .how {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 2px solid var(--ink);
+  }
+  .how h2 {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .how p + p { margin-top: 10px; }
+
+  .form { margin-top: 32px; }
+  label {
+    display: block;
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+  textarea {
+    width: 100%;
+    min-height: 92px;
+    resize: vertical;
+    padding: 14px 16px;
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 18px;
+    color: var(--ink);
+    background: var(--card);
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    outline: none;
+  }
+  textarea:focus { border-color: var(--accent); }
+  .counter { text-align: right; font-family: 'Archivo', sans-serif; font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .chips span { font-family: 'Archivo', sans-serif; font-size: 13px; color: var(--muted); align-self: center; margin-right: 2px; }
+  .chip {
+    font-family: 'Archivo', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--chip);
+    color: var(--ink);
+    border: none;
+    border-radius: 999px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .chip:hover { background: var(--line); }
+
+  .btn {
+    display: inline-block;
+    margin-top: 20px;
+    font-family: 'Archivo', sans-serif;
+    font-weight: 900;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: none;
+    border-radius: 10px;
+    padding: 15px 26px;
+    cursor: pointer;
+    width: 100%;
+    transition: transform .1s;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { opacity: .55; cursor: wait; }
+
+  .loading {
+    display: none;
+    margin-top: 28px;
+    font-family: 'Archivo', sans-serif;
+    font-size: 15px;
+    color: var(--muted);
+    text-align: center;
+  }
+  .loading.on { display: block; }
+  .dots::after { content: ''; animation: dots 1.2s steps(4) infinite; }
+  @keyframes dots { 0%{content:''} 25%{content:'.'} 50%{content:'..'} 75%{content:'...'} }
+
+  .result {
+    display: none;
+    margin-top: 32px;
+    background: var(--card);
+    border: 2px solid var(--ink);
+    border-radius: 14px;
+    padding: 26px 24px 22px;
+    box-shadow: 6px 6px 0 var(--accent);
+  }
+  .result.on { display: block; animation: rise .35s ease-out; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  .result .label {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .result .job {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 900;
+    font-size: 24px;
+    line-height: 1.15;
+    margin: 6px 0 14px;
+  }
+  .result .text { font-size: 20px; line-height: 1.5; }
+  .actions { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+  .ghost {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    background: transparent;
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+  .ghost:hover { background: var(--chip); }
+
+  .error {
+    display: none;
+    margin-top: 20px;
+    font-family: 'Archivo', sans-serif;
+    font-size: 15px;
+    color: var(--accent);
+  }
+  .error.on { display: block; }
+
+  .disclaimer {
+    margin-top: 48px;
+    font-family: 'Archivo', sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+  footer {
+    margin-top: 16px;
+    font-family: 'Archivo', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  footer a { color: var(--ink); font-weight: 700; }
+
+  .demo {
+    font-family: 'Archivo', sans-serif;
+    font-size: 12px;
+    background: var(--ink);
+    color: var(--paper);
+    text-align: center;
+    padding: 6px 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="demo" id="demoBar" hidden>Anteprima: risposte di esempio, il worker non è ancora collegato</div>
+
+<div class="wrap">
+  <div class="kicker">OraBuca</div>
+  <h1>Ma in pratica, che lavoro fai?</h1>
+  <p class="sub">Un traduttore onesto di lavori incomprensibili</p>
+
+  <section class="how">
+    <h2>Come funziona</h2>
+    <p>Scrivete il vostro job title, oppure raccontate in due righe cosa fate tutto il giorno. Il traduttore vi restituirà la traduzione onesta: quello che fate davvero, detto come lo direbbe qualcuno che non deve vendervi niente.</p>
+    <p>Funziona anche con i lavori comprensibili. In quel caso vi racconta la parte che nessuno dice alle cene.</p>
+  </section>
+
+  <div class="form">
+    <label for="job">Che lavoro fate?</label>
+    <textarea id="job" maxlength="300" placeholder="Es. Digital Marketing Specialist, oppure: mi occupo della gestione dei canali social e delle campagne pubblicitarie online"></textarea>
+    <div class="counter"><span id="count">0</span>/300</div>
+    <div class="chips">
+      <span>Non vi viene in mente?</span>
+      <button class="chip" type="button">Growth Hacker</button>
+      <button class="chip" type="button">Scrum Master</button>
+      <button class="chip" type="button">Brand Manager</button>
+      <button class="chip" type="button">Idraulico</button>
+    </div>
+    <button class="btn" id="go">Traduci</button>
+  </div>
+
+  <div class="loading" id="loading"><span id="loadMsg">Diradando la nebbiolina</span><span class="dots"></span></div>
+  <div class="error" id="error"></div>
+
+  <div class="result" id="result">
+    <div class="label">Traduzione onesta</div>
+    <div class="job" id="resJob"></div>
+    <p class="text" id="resText"></p>
+    <div class="actions">
+      <button class="ghost" id="copy">Copia</button>
+      <button class="ghost" id="again">Traduci un altro lavoro</button>
+    </div>
+  </div>
+
+  <p class="disclaimer">Le traduzioni sono scritte da un’intelligenza artificiale istruita a essere sincera, non a essere giusta. Ogni somiglianza con la vostra vita lavorativa è purtroppo voluta. OraBuca non salva quello che scrivete.</p>
+  <footer>Un giochino di <a href="https://orabuca.substack.com" target="_blank" rel="noopener">OraBuca</a></footer>
+</div>
+
+<script>
+  // Inserire qui l'URL del worker Cloudflare. Se vuoto, la pagina usa risposte di esempio.
+  const WORKER_URL = 'https://orabuca-traduttore.giglio-c83.workers.dev';
+
+  const $ = id => document.getElementById(id);
+  const job = $('job'), go = $('go'), loading = $('loading'), loadMsg = $('loadMsg');
+  const result = $('result'), resJob = $('resJob'), resText = $('resText'), err = $('error');
+
+  const loadingMsgs = [
+    'Diradando la nebbiolina',
+    'Togliendo gli acronimi',
+    'Spiegandolo a vostra nonna',
+    'Chiedendo cosa fate davvero',
+    'Ignorando il profilo LinkedIn'
+  ];
+
+  const demo = {
+    'growth hacker': 'Il tuo lavoro è far crescere i numeri, quali numeri non è importante. Fai esperimenti con i colori dei pulsanti e le mail delle 7:03, e quando qualcosa funziona lo chiami «hack» per non ammettere che è stato il caso.',
+    'scrum master': 'Ogni mattina chiedi a tutti cosa hanno fatto ieri, come un genitore all’uscita da scuola. Non scrivi una riga di codice, ma sai benissimo perché è in ritardo.',
+    'brand manager': 'Custodisci l’anima di un detersivo. Sai esattamente quale sfumatura di blu significa «fiducia» e quale «ospedale», e ne discuti con passione in riunioni di due ore.',
+    'idraulico': 'Tutti ti adorano finché non arriva il preventivo. Passi la vita in ginocchio sotto i lavandini degli altri, a scoprire cosa buttano nello scarico e a fingere di non giudicarli.'
+  };
+  const demoFallback = 'Hai un titolo in inglese che nemmeno il tuo capo saprebbe tradurre. Passi la giornata tra call, slide e una cartella condivisa che si chiama «DEFINITIVO_v7», e il venerdì ti chiedi cosa hai prodotto, senza trovare una risposta che stia in una frase.';
+
+  if (!WORKER_URL) $('demoBar').hidden = false;
+
+  job.addEventListener('input', () => { $('count').textContent = job.value.length; });
+  job.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); translate(); }
+  });
+  document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+    job.value = c.textContent;
+    $('count').textContent = job.value.length;
+    translate();
+  }));
+  go.addEventListener('click', translate);
+
+  $('again').addEventListener('click', () => {
+    result.classList.remove('on');
+    job.value = '';
+    $('count').textContent = 0;
+    job.focus();
+    window.scrollTo({ top: job.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
+  });
+
+  $('copy').addEventListener('click', async () => {
+    const txt = `${resJob.textContent}\n${resText.textContent}\n\n– Il traduttore di lavori incomprensibili di OraBuca\n${location.href}`;
+    try {
+      await navigator.clipboard.writeText(txt);
+      $('copy').textContent = 'Copiato!';
+      setTimeout(() => { $('copy').textContent = 'Copia'; }, 1600);
+    } catch (e) { $('copy').textContent = 'Non riesco a copiare'; }
+  });
+
+  async function translate() {
+    const value = job.value.trim();
+    if (!value) { job.focus(); return; }
+
+    err.classList.remove('on');
+    result.classList.remove('on');
+    go.disabled = true;
+    loading.classList.add('on');
+    let i = 0;
+    loadMsg.textContent = loadingMsgs[0];
+    const timer = setInterval(() => { i = (i + 1) % loadingMsgs.length; loadMsg.textContent = loadingMsgs[i]; }, 1500);
+
+    try {
+      let text;
+      if (!WORKER_URL) {
+        await new Promise(r => setTimeout(r, 1800));
+        text = demo[value.toLowerCase()] || demoFallback;
+      } else {
+        const res = await fetch(WORKER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ job: value })
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || 'Errore');
+        text = data.traduzione;
+      }
+      resJob.textContent = value.length > 60 ? value.slice(0, 57) + '…' : value;
+      resText.textContent = text;
+      result.classList.add('on');
+      result.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (e) {
+      err.textContent = 'Il traduttore si è perso in una call. Riprovate tra un momento.';
+      err.classList.add('on');
+    } finally {
+      clearInterval(timer);
+      loading.classList.remove('on');
+      go.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
