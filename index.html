@@ -190,6 +190,16 @@
     cursor: pointer;
   }
   .ghost:hover { background: var(--chip); }
+  .ghost.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .ghost.primary:hover { filter: brightness(1.05); background: var(--accent); }
+  .share-menu { display: none; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .share-menu.on { display: flex; }
+  .share-menu a, .share-menu button {
+    font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 13px;
+    text-decoration: none; color: var(--ink); background: var(--chip);
+    border: none; border-radius: 999px; padding: 7px 14px; cursor: pointer;
+  }
+  .share-menu a:hover, .share-menu button:hover { background: var(--line); }
 
   .error {
     display: none;
@@ -262,8 +272,17 @@
     <div class="job" id="resJob"></div>
     <p class="text" id="resText"></p>
     <div class="actions">
+      <button class="ghost primary" id="share">Condividi</button>
       <button class="ghost" id="copy">Copia</button>
       <button class="ghost" id="again">Traduci un altro lavoro</button>
+    </div>
+    <div class="share-menu" id="shareMenu">
+      <a id="shWa" target="_blank" rel="noopener">WhatsApp</a>
+      <a id="shTg" target="_blank" rel="noopener">Telegram</a>
+      <a id="shLi" target="_blank" rel="noopener">LinkedIn</a>
+      <a id="shX" target="_blank" rel="noopener">X</a>
+      <a id="shMail">Email</a>
+      <button id="shLink" type="button">Copia link</button>
     </div>
   </div>
 
@@ -316,8 +335,38 @@
     window.scrollTo({ top: job.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
   });
 
+  const pageUrl = location.origin + location.pathname;
+  const shareText = () => `${resJob.textContent}, traduzione onesta: ${resText.textContent}\n\nE il tuo lavoro? Traducilo qui:`;
+
+  $('share').addEventListener('click', async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Ma in pratica, che lavoro fai?', text: shareText(), url: pageUrl });
+        return;
+      } catch (e) {
+        if (e.name === 'AbortError') return;
+      }
+    }
+    const t = encodeURIComponent(shareText());
+    const u = encodeURIComponent(pageUrl);
+    $('shWa').href = `https://wa.me/?text=${t}%20${u}`;
+    $('shTg').href = `https://t.me/share/url?url=${u}&text=${t}`;
+    $('shLi').href = `https://www.linkedin.com/sharing/share-offsite/?url=${u}`;
+    $('shX').href = `https://twitter.com/intent/tweet?text=${t}&url=${u}`;
+    $('shMail').href = `mailto:?subject=${encodeURIComponent('Ma in pratica, che lavoro fai?')}&body=${t}%20${u}`;
+    $('shareMenu').classList.toggle('on');
+  });
+
+  $('shLink').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(pageUrl);
+      $('shLink').textContent = 'Link copiato!';
+      setTimeout(() => { $('shLink').textContent = 'Copia link'; }, 1600);
+    } catch (e) { $('shLink').textContent = 'Non riesco a copiare'; }
+  });
+
   $('copy').addEventListener('click', async () => {
-    const txt = `${resJob.textContent}\n${resText.textContent}\n\n– Il traduttore di lavori incomprensibili di OraBuca\n${location.href}`;
+    const txt = `${resJob.textContent}\n${resText.textContent}\n\nE il tuo lavoro? Traducilo qui: ${pageUrl}`;
     try {
       await navigator.clipboard.writeText(txt);
       $('copy').textContent = 'Copiato!';
@@ -331,6 +380,7 @@
 
     err.classList.remove('on');
     result.classList.remove('on');
+    $('shareMenu').classList.remove('on');
     go.disabled = true;
     loading.classList.add('on');
     let i = 0;
